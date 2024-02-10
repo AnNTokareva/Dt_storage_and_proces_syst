@@ -1,0 +1,45 @@
+Так как в изначальном файле в таблице "transaction" поля по транзакциям и продуктам были соединены в одну таблицу, мы не могли сказать, что наша БД имеет 1-3 нормальную форму. Я убрала из таблицы "transaction" информацию по продуктам, 
+оставив "product_id", чтобы в дальнейшем связываться по этому ключу с таблицей "product". В таблицу product перенесла все данные по продуктам, а также добавила первичный ключ "id". Теперь БД приведена к 1НФ — 3НФ.
+В итоге получлось три таблицы. 
+Создадим их:
+create table product(
+	id integer NOT null
+	,product_id integer 
+	,brand text
+	,product_line text
+	,product_class text
+	,product_size text
+	,list_price float
+	,standard_cost float
+)
+
+create table customer(
+	customer_id integer not null
+	,first_name text
+	,last_name text
+	,gender text
+	,DOB varchar(10)
+	,job_title varchar
+	,job_industry_category varchar
+	,wealth_segment varchar
+	,deceased_indicator text
+	,owns_car text
+	,address varchar
+	,postcode int4
+	,state text
+	,country text
+	,property_valuation integer
+) 
+
+
+create table transaction(
+	transaction_id integer not null
+	,product_id integer
+	,customer_id integer
+	,transaction_date varchar(10)
+	,online_order text
+	,order_status text
+)
+
+
+Данные загружались используя возможности инструмента DBeaver.
