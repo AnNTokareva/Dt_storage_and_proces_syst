@@ -43,3 +43,5 @@ create table transaction(
 
 
 Данные загружались используя возможности инструмента DBeaver.
+
+Ссылка на рисунок структуры БД: https://dbdiagram.io/d 
