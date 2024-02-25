@@ -1,0 +1,73 @@
+1)
+select job_industry_category, count(customer_id) as count_customer_id
+from customer c 
+group by job_industry_category
+order by count_customer_id desc
+
+2)
+select date_part('month', t.transaction_date::date) as month_, job_industry_category, sum(list_price)
+from customer c 
+join "transaction" t on c.customer_id = t.customer_id
+join product p on p.product_id = t.product_id 
+group by month_,  job_industry_category
+order by month_,  job_industry_category
+
+3)
+select brand, count(online_order)
+from customer c 
+join "transaction" t on c.customer_id = t.customer_id
+join product p on p.product_id = t.product_id 
+where online_order = 'True' and job_industry_category = 'IT' and order_status = 'Approved'
+group by brand
+
+4.1)
+select c.customer_id, sum(list_price) sum_trans, max(list_price) max_trans, min(list_price) min_trans, count(list_price) count_trans
+from customer c 
+join "transaction" t on c.customer_id = t.customer_id
+join product p on p.product_id = t.product_id 
+group by c.customer_id
+order by count_trans, sum_trans desc
+4.2)
+select distinct(c.customer_id),sum(list_price) over(partition by c.customer_id) sum_trans, max(list_price) over(partition by c.customer_id) max_trans
+, min(list_price) over(partition by c.customer_id) min_trans, count(list_price) over(partition by c.customer_id) count_trans
+from customer c 
+join "transaction" t on c.customer_id = t.customer_id 
+join product p on p.product_id = t.product_id 
+order by count_trans, sum_trans desc
+
+--вывод: С group by писать запрос лучше, так как группировка идет по одним и тем же столбцам, поэтому нет необходимости прописывать оконные функции в данной задаче 
+
+5.1)
+select first_name, last_name, min(list_price) min_trans
+from customer c 
+join "transaction" t on c.customer_id = t.customer_id
+join product p on p.product_id = t.product_id 
+where list_price is not null 
+group by first_name, last_name
+5.2)
+select first_name, last_name, max(list_price) min_trans
+from customer c 
+join "transaction" t on c.customer_id = t.customer_id
+join product p on p.product_id = t.product_id 
+where list_price is not null 
+group by first_name, last_name
+
+6)
+select c.customer_id, transaction_id, min(transaction_date) over(partition by c.customer_id) first_trans_dt
+from customer c 
+join "transaction" t on c.customer_id = t.customer_id
+
+7)
+with transaction_intervals as (
+    select
+        first_name, last_name, job_title, transaction_date::date,
+        LAG(transaction_date::date) over (PARTITION BY first_name, last_name, job_title order by transaction_date::date) prev_date,
+        (transaction_date::date - lag(transaction_date::date) over (partition by first_name, last_name, job_title order by transaction_date::date)) as interval_days
+    from customer c 
+	join "transaction" t on c.customer_id = t.customer_id
+	join product p on p.product_id = t.product_id 
+)
+select
+     first_name, last_name, job_title, interval_days 
+from transaction_intervals
+where interval_days = (select max(interval_days) from transaction_intervals)
